@@ -4,12 +4,14 @@
 // @license MIT
 // @name         Scroll Page Progress
 // @namespace    http://tampermonkey.net/
-// @version      1.8.1
+// @version      1.8.2
 // @description  Visual indicator of page progress while scrolling
 // @author       You
 // @match        *://*/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
+// @downloadURL https://update.greasyfork.org/scripts/502780/Scroll%20Page%20Progress.user.js
+// @updateURL https://update.greasyfork.org/scripts/502780/Scroll%20Page%20Progress.meta.js
 // ==/UserScript==
 
 (function () {
@@ -21,6 +23,7 @@
     movementIntervalId: null
   }
   let globalShadow
+  let progressBar
   const createDiv = () => document.createElement('div')
 
   function insertCirculaProgressBarEl() {
@@ -30,6 +33,7 @@
     globalShadow = shadow
 
     const circularProgressBar = createDiv()
+    progressBar = circularProgressBar
     const contentWrapper = createDiv()
     const closeOverlay = createDiv()
     const title = createDiv()
@@ -203,10 +207,6 @@
     globalShadow.appendChild(styleSheet)
   }
 
-  insertCirculaProgressBarEl()
-  addCSS()
-
-
   function setAngle(deg) {
     const progressBar = globalShadow.querySelector('.circular-progress-bar')
     const leftSide = globalShadow.querySelector('.left-side')
@@ -277,35 +277,36 @@
       }, wait);
     };
   }
-  const progressBar = globalShadow.querySelector('.circular-progress-bar')
 
-  let offsetX = 0, offsetY = 0, isDragging = false;
+  function setEventListeners() {
+      let offsetX = 0, offsetY = 0, isDragging = false;
 
-  progressBar.addEventListener("mousedown", (e) => {
-    e.preventDefault()
-    offsetX = e.clientX - progressBar.offsetLeft;
-    offsetY = e.clientY - progressBar.offsetTop;
-    isDragging = true;
-    progressBar.style.cursor = "grabbing";
-    progressBar.style.opacity = "0.3";
-  });
+      progressBar.addEventListener("mousedown", (e) => {
+        e.preventDefault()
+        offsetX = e.clientX - progressBar.offsetLeft;
+        offsetY = e.clientY - progressBar.offsetTop;
+        isDragging = true;
+        progressBar.style.cursor = "grabbing";
+        progressBar.style.opacity = "0.3";
+      });
 
-  document.addEventListener("mousemove", (e) => {
-    if (isDragging) {
-      e.preventDefault();
-      const left = e.clientX - offsetX;
-      const top = e.clientY - offsetY;
-      progressBar.style.left = `${left}px`;
-      progressBar.style.top = `${top}px`;
-      savePosition(left, top); // Guardar la posición cada vez que se mueve
-    }
-  });
+      document.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+          e.preventDefault();
+          const left = e.clientX - offsetX;
+          const top = e.clientY - offsetY;
+          progressBar.style.left = `${left}px`;
+          progressBar.style.top = `${top}px`;
+          savePosition(left, top); // Guardar la posición cada vez que se mueve
+        }
+      });
 
-  document.addEventListener("mouseup", () => {
-    isDragging = false;
-    progressBar.style.cursor = "grab";
-    progressBar.style.opacity = "1";
-  });
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+        progressBar.style.cursor = "grab";
+        progressBar.style.opacity = "1";
+      });
+  }
 
   function savePosition(left, top) {
     const position = { left, top };
@@ -343,7 +344,6 @@
     return Math.trunc(progress);
   }
 
-  const progressBarTitle = globalShadow.querySelector('.title')
   document.onreadystatechange = function () {
     if (document.readyState == "complete") {
       if (window.trustedTypes && window.trustedTypes.createPolicy && !window.trustedTypes.defaultPolicy) {
@@ -351,6 +351,12 @@
           createHTML: (string, sink) => string
         });
       }
+
+
+      insertCirculaProgressBarEl()
+      setEventListeners()
+      const progressBarTitle = globalShadow.querySelector('.title')
+      addCSS()
 
       loadPosition()
       document.addEventListener('scroll', debounce(() => {
