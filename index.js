@@ -4,7 +4,7 @@
 // @license MIT
 // @name         Scroll Page Progress
 // @namespace    http://tampermonkey.net/
-// @version      1.8.2
+// @version      1.8.3
 // @description  Visual indicator of page progress while scrolling
 // @author       You
 // @match        *://*/*
