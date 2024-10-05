@@ -344,6 +344,17 @@
     return Math.trunc(progress);
   }
 
+  function watchScroll() {
+    const progressBarTitle = globalShadow.querySelector('.title')
+    document.addEventListener('scroll', debounce(() => {
+      setPercentage(getCurrentScrollProgress())
+      progressBarTitle.innerText = getCurrentScrollProgress() + '%'
+      currentState.progress = getCurrentScrollProgress()
+      currentState.deg = percentageToAngle(getCurrentScrollProgress())
+    }, 50))
+  }
+
+
   document.onreadystatechange = function () {
     if (document.readyState == "complete") {
       if (window.trustedTypes && window.trustedTypes.createPolicy && !window.trustedTypes.defaultPolicy) {
@@ -352,19 +363,11 @@
         });
       }
 
-
       insertCirculaProgressBarEl()
       setEventListeners()
-      const progressBarTitle = globalShadow.querySelector('.title')
       addCSS()
-
       loadPosition()
-      document.addEventListener('scroll', debounce(() => {
-        setPercentage(getCurrentScrollProgress())
-        progressBarTitle.innerText = getCurrentScrollProgress() + '%'
-        currentState.progress = getCurrentScrollProgress()
-        currentState.deg = percentageToAngle(getCurrentScrollProgress())
-      }, 50))
+      watchScroll()
     }
   }
 
